@@ -70,14 +70,15 @@ defmodule Ueberauth.Strategy.Keycloak do
   """
   require Logger
 
+  alias Ueberauth.Auth.Credentials
+  alias Ueberauth.Auth.Extra
+  alias Ueberauth.Auth.Info
+  alias Ueberauth.Strategy.Keycloak.OAuth
+
   use Ueberauth.Strategy,
     uid_field: :id,
     default_scope: "api read_user read_registry",
-    oauth2_module: Ueberauth.Strategy.Keycloak.OAuth
-
-  alias Ueberauth.Auth.Info
-  alias Ueberauth.Auth.Credentials
-  alias Ueberauth.Auth.Extra
+    oauth2_module: OAuth
 
   @doc """
   Handles the initial redirect to the keycloak authentication page.
@@ -193,11 +194,10 @@ defmodule Ueberauth.Strategy.Keycloak do
 
   defp fetch_user(conn, token) do
     conn = put_private(conn, :keycloak_token, token)
-    api_ver = option(conn, :api_ver) || "v4"
 
-    case Ueberauth.Strategy.Keycloak.OAuth.get(
+    case OAuth.get(
            token,
-           Ueberauth.Strategy.Keycloak.OAuth.userinfo_url()
+           OAuth.userinfo_url()
          ) do
       {:ok, %OAuth2.Response{status_code: 401, body: _body}} ->
         set_errors!(conn, [error("token", "unauthorized")])

@@ -10,6 +10,10 @@ defmodule Ueberauth.Strategy.Keycloak.OAuth do
   """
   use OAuth2.Strategy
 
+  alias OAuth2.Client
+  alias OAuth2.Strategy.AuthCode
+  alias Ueberauth.Strategy.Keycloak.OAuth
+
   @defaults [
     strategy: __MODULE__,
     site: "http://localhost:8080",
@@ -38,14 +42,12 @@ defmodule Ueberauth.Strategy.Keycloak.OAuth do
     OAuth2.Client.new(client_opts)
   end
 
-  @doc """
-  Fetches configuration for `Ueberauth.Strategy.Keycloak.OAuth` Strategy from `config.exs`
-
-  Also checks if at least `client_id` and `client_secret` are set, raising an error if not.
-  """
-  defp config() do
+  # Fetches configuration for `Ueberauth.Strategy.Keycloak.OAuth` Strategy from `config.exs`
+  #
+  # Also checks if at least `client_id` and `client_secret` are set, raising an error if not.
+  defp config do
     :ueberauth
-    |> Application.fetch_env!(Ueberauth.Strategy.Keycloak.OAuth)
+    |> Application.fetch_env!(OAuth)
     |> check_config_key_exists(:client_id)
     |> check_config_key_exists(:client_secret)
   end
@@ -56,14 +58,14 @@ defmodule Ueberauth.Strategy.Keycloak.OAuth do
   def authorize_url!(params \\ [], opts \\ []) do
     opts
     |> client
-    |> OAuth2.Client.authorize_url!(params)
+    |> Client.authorize_url!(params)
   end
 
   @doc """
   Fetches `userinfo_url` for `Ueberauth.Strategy.Keycloak.OAuth` Strategy from `config.exs`.
   It will be used to get user profile information after an successful authentication.
   """
-  def userinfo_url() do
+  def userinfo_url do
     config()
     |> Keyword.get(:userinfo_url)
   end
@@ -72,14 +74,14 @@ defmodule Ueberauth.Strategy.Keycloak.OAuth do
     [token: token]
     |> client
     |> put_param("access_token", token)
-    |> OAuth2.Client.get(url, headers, opts)
+    |> Client.get(url, headers, opts)
   end
 
   def get_token!(params \\ [], options \\ []) do
     headers = Keyword.get(options, :headers, [])
     options = Keyword.get(options, :options, [])
     client_options = Keyword.get(options, :client_options, [])
-    client = OAuth2.Client.get_token!(client(client_options), params, headers, options)
+    client = Client.get_token!(client(client_options), params, headers, options)
     client.token
   end
 
@@ -90,7 +92,7 @@ defmodule Ueberauth.Strategy.Keycloak.OAuth do
     |> put_param("response_type", "code")
     |> put_param("redirect_uri", client().redirect_uri)
 
-    OAuth2.Strategy.AuthCode.authorize_url(client, params)
+    AuthCode.authorize_url(client, params)
   end
 
   def get_token(client, params, headers) do
@@ -100,7 +102,7 @@ defmodule Ueberauth.Strategy.Keycloak.OAuth do
     |> put_param("grant_type", "authorization_code")
     |> put_param("redirect_uri", client().redirect_uri)
     |> put_header("Accept", "application/json")
-    |> OAuth2.Strategy.AuthCode.get_token(params, headers)
+    |> AuthCode.get_token(params, headers)
   end
 
   defp check_config_key_exists(config, key) when is_list(config) do
