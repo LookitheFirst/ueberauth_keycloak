@@ -8,7 +8,7 @@ defmodule UeberauthKeycloak.Mixfile do
       app: :ueberauth_keycloak_strategy,
       version: @version,
       package: package(),
-      elixir: "~> 1.3",
+      elixir: "~> 1.8",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       source_url: "https://github.com/Rukenshia/ueberauth_keycloak",
