@@ -39,7 +39,10 @@ defmodule Ueberauth.Strategy.Keycloak.OAuth do
       |> Keyword.merge(config())
       |> Keyword.merge(opts)
 
+    json_library = Ueberauth.json_library()
+
     OAuth2.Client.new(client_opts)
+    |> OAuth2.Client.put_serializer("application/json", json_library)
   end
 
   # Fetches configuration for `Ueberauth.Strategy.Keycloak.OAuth` Strategy from `config.exs`
@@ -66,7 +69,8 @@ defmodule Ueberauth.Strategy.Keycloak.OAuth do
   It will be used to get user profile information after an successful authentication.
   """
   def userinfo_url do
-    config()
+    @defaults
+    |> Keyword.merge(config())
     |> Keyword.get(:userinfo_url)
   end
 
