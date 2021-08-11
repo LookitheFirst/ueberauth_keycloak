@@ -29,17 +29,13 @@ This repository is based on the work of [mtchavez/ueberauth_keycloak](https://gi
     ```elixir
     config :ueberauth, Ueberauth,
       providers: [
-        keycloak: {Ueberauth.Strategy.Keycloak, [default_scope: "read_user"]}
+        keycloak: {Ueberauth.Strategy.Keycloak, [
+          default_scope: "read_user",
+          client_id: System.get_env("KEYCLOAK_CLIENT_ID"),
+          client_secret: System.get_env("KEYCLOAK_CLIENT_SECRET"),
+          redirect_uri: System.get_env("KEYCLOAK_REDIRECT_URI")
+        ]}
       ]
-    ```
-
-1.  Update your provider configuration:
-
-    ```elixir
-    config :ueberauth, Ueberauth.Strategy.Keycloak.OAuth,
-      client_id: System.get_env("KEYCLOAK_CLIENT_ID"),
-      client_secret: System.get_env("KEYCLOAK_CLIENT_SECRET"),
-      redirect_uri: System.get_env("KEYCLOAK_REDIRECT_URI")
     ```
 
 1.  Include the Überauth plug in your controller:
